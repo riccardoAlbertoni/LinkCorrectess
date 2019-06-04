@@ -1,0 +1,24 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+select distinct 
+?o 
+?oPrefLabel 
+?oDefinition
+(GROUP_CONCAT(?oAltLabel ; separator="| ") as ?oAltLabels) 
+(GROUP_CONCAT(?oBroaderPrefLabel; separator="| ") as ?oBT) 
+(GROUP_CONCAT(?oNarrowerPrefLabel; separator="| ") as ?oNT)
+(GROUP_CONCAT(?oRelatedPrefLabel; separator="| ") as ?oRT) 
+
+where {
+ ?o skos:prefLabel ?oPrefLabel. filter (lang(?oPrefLabel)='en') filter regex(str(?o),"^http://dbpedia.org/",'i')  . 
+ optional { ?o skos:definition ?oDefinition . filter (lang(?oDefinition)='en')}. 
+ optional { ?o skos:altLabel  ?oAltLabel . filter (lang(?oAltLabel)='en')}. 
+ optional{?o skos:broader ?oBroader. ?oBroader skos:prefLabel ?oBroaderPrefLabel. filter (lang(?oBroaderPrefLabel)='en')}
+   optional{
+     ?o skos:narrower ?oNarrower. ?oNarrower skos:prefLabel ?oNarrowerPrefLabel. filter (lang(?oNarrowerPrefLabel)='en') } . 
+   optional{
+     ?o skos:related ?oRelated. ?oRelated skos:prefLabel ?oRelatedPrefLabel. filter (lang(?oRelatedPrefLabel)='en') } . 
+ } group by  ?o ?oPrefLabel ?oDefinition
+  order by  ?o ?oPrefLabel ?oDefinition

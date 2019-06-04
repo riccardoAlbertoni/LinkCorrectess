@@ -1,0 +1,6 @@
+
+Construct{
+?s ?p ?o }
+where {
+graph ?g { ?s ?p ?o}
+}

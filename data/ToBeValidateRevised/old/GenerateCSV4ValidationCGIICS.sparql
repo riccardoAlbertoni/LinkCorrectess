@@ -1,0 +1,26 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix skosxl: <http://www.w3.org/2008/05/skos-xl#>
+
+
+select distinct (GROUP_CONCAT(?sBroaderPrefLabel; separator="| ") as ?BroadersOfs)   ?s ?sPrefLabel ?o ?oPrefLabel ?oDefinition (GROUP_CONCAT(?oBroaderPrefLabel; separator="| ") as ?BroadersOfO)
+
+where {
+
+ graph <THIST2CGIISCNEW.nt> { ?s skos:exactMatch ?o. }.
+
+ 
+   GRAPH  <../../../CGIVocab/CGI_isc2014.rdf> { 
+    optional {?o skos:prefLabel ?oPrefLabel. filter (lang(?oPrefLabel)='en') }. optional {?o skos:definition  ?oDefinition.  filter (lang(?oDefinition)='en')}
+    optional { ?o skos:broader ?oBroader. ?oBroader skos:prefLabel ?oBroaderPrefLabel. filter (lang(?oBroaderPrefLabel)='en')}  
+  }
+
+service <http://sirio.private.imati.net:8890/sparql> { 
+    optional { ?s skos:prefLabel ?sPrefLabel. filter (lang(?sPrefLabel)='en')}.  optional{
+     ?s skos:broader ?sBroader. ?sBroader skos:prefLabel ?sBroaderPrefLabel. filter (lang(?sBroaderPrefLabel)='en') } . 
+  }.
+
+   
+} group by ?s ?o   ?sPrefLabel ?o ?oPrefLabel ?oDefinition?oBroaderPrefLabel 
+order by ?s ?o
+
+

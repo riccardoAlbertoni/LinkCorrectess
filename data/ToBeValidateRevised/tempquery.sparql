@@ -1,0 +1,26 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#> 
+    prefix skosxl: <http://www.w3.org/2008/05/skos-xl#>
+    PREFIX  :       <.> 
+
+    select distinct  
+    (GROUP_CONCAT(?oBroaderPrefLabel; separator="| ") as ?oBT)  
+    (GROUP_CONCAT(?oNarrowerPrefLabel; separator="| ") as ?oNT) 
+    (GROUP_CONCAT(?oRelatedPrefLabel; separator="| ") as ?oRT)  
+    ?o 
+    ?oPrefLabel 
+    (GROUP_CONCAT(?oAltLabel ; separator="| ") as ?oAltLabels)  
+    where { 
+    ?s skos:exactMatch ?o.  
+     filter regex(str(?s),"^http://linkeddata.ge.imati.cnr.it/resource/ThIST/",'i'). 
+     filter regex(str(?o),"^http://eurovoc.europa.eu/",'i')   
+       optional { ?o skos:prefLabel ?oPrefLabel. filter (lang(?oPrefLabel)='en')}.  
+        optional { ?o skos:altLabel  ?oAltLabel . filter (lang(?oAltLabel)='en')}.  
+       optional{ 
+         ?o skos:broader ?oBroader. ?oBroader skos:prefLabel ?oBroaderPrefLabel. filter (lang(?oBroaderPrefLabel)='en') } .  
+       optional{ 
+         ?o skos:narrower ?oNarrower. ?oNarrower skos:prefLabel ?oNarrowerPrefLabel. filter (lang(?oNarrowerPrefLabel)='en') } .  
+       optional{ 
+         ?o skos:related ?oRelated. ?oRelated skos:prefLabel ?oRelatedPrefLabel. filter (lang(?oRelatedPrefLabel)='en') } .  
+    } 
+    group by ?o ?oPrefLabel 
+    order by ?o 

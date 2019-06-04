@@ -1,0 +1,26 @@
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix skosxl: <http://www.w3.org/2008/05/skos-xl#>
+PREFIX  :       <.>
+
+select distinct 
+(GROUP_CONCAT(?sBroaderPrefLabel; separator="| ") as ?sBT) 
+(GROUP_CONCAT(?sNarrowerPrefLabel; separator="| ") as ?sNT)
+(GROUP_CONCAT(?sRelatedPrefLabel; separator="| ") as ?sRT) 
+?s 
+?sPrefLabel 
+(GROUP_CONCAT(?sAltLabel ; separator="| ") as ?sAltLabels) ?o 
+where {
+?s skos:exactMatch ?o. 
+ filter regex(str(?s),"http://linkeddata.ge.imati.cnr.it/resource/ThIST/",'i').
+ filter regex(str(?o),"^http://dbpedia.org/",'i')  
+   optional { ?s skos:prefLabel ?sPrefLabel. filter (lang(?sPrefLabel)='en')}. 
+    optional { ?s skos:altLabel  ?sAltLabel . filter (lang(?sAltLabel)='en')}. 
+   optional{
+     ?s skos:broader ?sBroader. ?sBroader skos:prefLabel ?sBroaderPrefLabel. filter (lang(?sBroaderPrefLabel)='en') } . 
+   optional{
+     ?s skos:narrower ?sNarrower. ?sNarrower skos:prefLabel ?sNarrowerPrefLabel. filter (lang(?sNarrowerPrefLabel)='en') } . 
+   optional{
+     ?s skos:related ?sRelated. ?sRelated skos:prefLabel ?sRelatedPrefLabel. filter (lang(?sRelatedPrefLabel)='en') } . 
+}
+group by ?s ?o ?sPrefLabel
+order by ?s ?o
